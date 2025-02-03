@@ -1,64 +1,58 @@
-const amount = document.getElementById('amount');
-const fromCurrency = document.getElementById('from');
-const toCurrency = document.getElementById('to');
-const convertBtn = document.getElementById('convert-btn');
-const resultText = document.getElementById('result-text');
+const currencyData = {
+    "AED": "AE", "AFN": "AF", "XCD": "AG", "ALL": "AL", "AMD": "AM", "ANG": "AN", "AOA": "AO", "AQD": "AQ", "ARS": "AR", "AUD": "AU", "AZN": "AZ", "BAM": "BA", "BBD": "BB", "BDT": "BD", "XOF": "BE", "BGN": "BG", "BHD": "BH", "BIF": "BI", "BMD": "BM", "BND": "BN", "BOB": "BO", "BRL": "BR", "BSD": "BS", "NOK": "BV", "BWP": "BW", "BYR": "BY", "BZD": "BZ", "CAD": "CA", "CDF": "CD", "XAF": "CF", "CHF": "CH", "CLP": "CL", "CNY": "CN", "COP": "CO", "CRC": "CR", "CUP": "CU", "CVE": "CV", "CYP": "CY", "CZK": "CZ", "DJF": "DJ", "DKK": "DK", "DOP": "DO", "DZD": "DZ", "ECS": "EC", "EEK": "EE", "EGP": "EG", "ETB": "ET", "EUR": "FR", "FJD": "FJ", "FKP": "FK", "GBP": "GB", "GEL": "GE", "GGP": "GG", "GHS": "GH", "GIP": "GI", "GMD": "GM", "GNF": "GN", "GTQ": "GT", "GYD": "GY", "HKD": "HK", "HNL": "HN", "HRK": "HR", "HTG": "HT", "HUF": "HU", "IDR": "ID", "ILS": "IL", "INR": "IN", "IQD": "IQ", "IRR": "IR", "ISK": "IS", "JMD": "JM", "JOD": "JO", "JPY": "JP", "KES": "KE", "KGS": "KG", "KHR": "KH", "KMF": "KM", "KPW": "KP", "KRW": "KR", "KWD": "KW", "KYD": "KY", "KZT": "KZ", "LAK": "LA", "LBP": "LB", "LKR": "LK", "LRD": "LR", "LSL": "LS", "LTL": "LT", "LVL": "LV", "LYD": "LY", "MAD": "MA", "MDL": "MD", "MGA": "MG", "MKD": "MK", "MMK": "MM", "MNT": "MN", "MOP": "MO", "MRO": "MR", "MTL": "MT", "MUR": "MU", "MVR": "MV", "MWK": "MW", "MXN": "MX", "MYR": "MY", "MZN": "MZ", "NAD": "NA", "XPF": "NC", "NGN": "NG", "NIO": "NI", "NPR": "NP", "NZD": "NZ", "OMR": "OM", "PAB": "PA", "PEN": "PE", "PGK": "PG", "PHP": "PH", "PKR": "PK", "PLN": "PL", "PYG": "PY", "QAR": "QA", "RON": "RO", "RSD": "RS", "RUB": "RU", "RWF": "RW", "SAR": "SA", "SBD": "SB", "SCR": "SC", "SDG": "SD", "SEK": "SE", "SGD": "SG", "SKK": "SK", "SLL": "SL", "SOS": "SO", "SRD": "SR", "STD": "ST", "SVC": "SV", "SYP": "SY", "SZL": "SZ", "THB": "TH", "TJS": "TJ", "TMT": "TM", "TND": "TN", "TOP": "TO", "TRY": "TR", "TTD": "TT", "TWD": "TW", "TZS": "TZ", "UAH": "UA", "UGX": "UG", "USD": "US", "UYU": "UY", "UZS": "UZ", "VEF": "VE", "VND": "VN", "VUV": "VU", "YER": "YE", "ZAR": "ZA", "ZMK": "ZM", "ZWD": "ZW"
+};
 
-const API_KEY = '8e6c9e834230aa60319a433e'; // Your API key
-const API_URL = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`;
+const fromCurrency = document.getElementById("fromCurrency");
+const toCurrency = document.getElementById("toCurrency");
+const fromFlag = document.getElementById("fromFlag");
+const toFlag = document.getElementById("toFlag");
 
-let currencies = [];
+// Function to populate dropdowns with currencies
+function populateCurrencies() {
+    for (let code in currencyData) {
+        let option1 = document.createElement("option");
+        let option2 = document.createElement("option");
+        option1.value = option2.value = code;
+        option1.textContent = code;
+        option2.textContent = code;
+        fromCurrency.appendChild(option1);
+        toCurrency.appendChild(option2);
+    }
 
-// Fetch currencies from API
-async function fetchCurrencies() {
-  try {
-    const response = await fetch(API_URL);
-    const data = await response.json();
-    currencies = Object.keys(data.conversion_rates);
-    populateDropdowns();
-  } catch (error) {
-    console.error('Error fetching currencies:', error);
-  }
+    // Set default flags
+    updateFlag(fromFlag, fromCurrency.value);
+    updateFlag(toFlag, toCurrency.value);
+
+    // Add event listeners to update flags when currency changes
+    fromCurrency.addEventListener("change", () => updateFlag(fromFlag, fromCurrency.value));
+    toCurrency.addEventListener("change", () => updateFlag(toFlag, toCurrency.value));
 }
 
-// Populate dropdowns with currencies
-function populateDropdowns() {
-  currencies.forEach(currency => {
-    const option1 = document.createElement('option');
-    option1.value = currency;
-    option1.textContent = currency;
-    fromCurrency.appendChild(option1);
-
-    const option2 = document.createElement('option');
-    option2.value = currency;
-    option2.textContent = currency;
-    toCurrency.appendChild(option2);
-  });
+// Function to update flag image
+function updateFlag(flagElement, currencyCode) {
+    const countryCode = currencyData[currencyCode];
+    flagElement.src = `https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`;
+    flagElement.alt = currencyCode;
 }
 
-// Convert currency
-async function convertCurrency() {
-  const from = fromCurrency.value;
-  const to = toCurrency.value;
-  const amountValue = amount.value;
-
-  if (!amountValue || amountValue < 0) {
-    alert('Please enter a valid amount');
-    return;
-  }
-
-  try {
-    const response = await fetch(`https://v6.exchangerate-api.com/v6/${API_KEY}/pair/${from}/${to}/${amountValue}`);
-    const data = await response.json();
-    const result = data.conversion_result;
-    resultText.textContent = `Result: ${result.toFixed(2)} ${to}`;
-  } catch (error) {
-    console.error('Error converting currency:', error);
-  }
+// Function to convert currency
+function convertCurrency() {
+    let amount = document.getElementById("amount").value;
+    if (amount === "") {
+        alert("Please enter an amount");
+        return;
+    }
+    let from = fromCurrency.value;
+    let to = toCurrency.value;
+    let url = `https://api.exchangerate-api.com/v4/latest/${from}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            let rate = data.rates[to];
+            document.getElementById("result").innerText = `${amount} ${from} = ${(amount * rate).toFixed(2)} ${to}`;
+        })
+        .catch(error => console.error("Error fetching exchange rates:", error));
 }
-
-// Event Listeners
-convertBtn.addEventListener('click', convertCurrency);
 
 // Initialize
-fetchCurrencies();
+populateCurrencies();
